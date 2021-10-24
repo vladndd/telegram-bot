@@ -79,8 +79,8 @@ def show_users(message):
 @bot.message_handler(commands=['add_subject'])
 def add_subject(message):
     name = message.text[13:]
-    if len(name) == 0:
-        bot.send_message(message.chat.id, "name is not provided, sorry")
+    if len(name) == 0 or len(name) >= 8 or not name.isalpha():
+        bot.send_message(message.chat.id, "incorrect subject provided, sorry")
     else:
         subject_exists = db.query(Subject).filter_by(name=name).first()
 
@@ -134,7 +134,7 @@ def process_callback(query):
             new_name = name[2::]
             new_date = date.strip()
             format = "%Y-%m-%d"
-            if len(new_name) >= 20:
+            if len(new_name) >= 20 or not new_name.isalpha():
                 bot.send_message(
                     message.chat.id, "incorrect name format, sorry")
             else:
