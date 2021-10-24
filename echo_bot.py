@@ -3,6 +3,8 @@ import datetime
 from telebot import types
 from connectdb import Interrogation, Subject, db, User
 from config import TOKEN
+import re
+
 
 # You can set parse_mode by default. HTML or MARKDOWN
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
@@ -79,20 +81,22 @@ def show_users(message):
 @bot.message_handler(commands=['add_subject'])
 def add_subject(message):
     name = message.text[13:]
-    if len(name) == 0 or len(name) >= 8 or not name.isalpha():
+    formatted_name = re.sub('[/?\!@$<>&^%]', '', name)
+    print(formatted_name)
+    if len(formatted_name) == 0 or len(formatted_name) >= 10:
         bot.send_message(message.chat.id, "incorrect subject provided, sorry")
     else:
-        subject_exists = db.query(Subject).filter_by(name=name).first()
+        subject_exists = db.query(Subject).filter_by(name=formatted_name).first()
 
         if not subject_exists:
-            new_subject = Subject(name=name)
+            new_subject = Subject(name=formatted_name)
             db.add(new_subject)
             db.commit()
             bot.reply_to(
                 message, "new subject added!")
         else:
             bot.reply_to(
-                message, f"Subject {name} already exists")
+                message, f"Subject {formatted_name} already exists")
 
 
 @bot.message_handler(commands=['add_interro'])
@@ -134,7 +138,9 @@ def process_callback(query):
             new_name = name[2::]
             new_date = date.strip()
             format = "%Y-%m-%d"
-            if len(new_name) >= 20 or not new_name.isalpha():
+            formatted_name = re.sub('[/?\!@$<>&^%]', '', new_name)
+            print(formatted_name)
+            if len(formatted_name) >= 20:
                 bot.send_message(
                     message.chat.id, "incorrect name format, sorry")
             else:
@@ -143,7 +149,7 @@ def process_callback(query):
                     year, month, day = new_date.split('-')
                     datetime.datetime(year=int(year),month=int(month),day=int(day))
                     new_interro = Interrogation(
-                        name=new_name, date=date, subject_id=subject_id)
+                        name=formatted_name, date=date, subject_id=subject_id)
                     db.add(new_interro)
                     db.commit()
                     bot.send_message(
