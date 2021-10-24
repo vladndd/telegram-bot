@@ -122,7 +122,7 @@ def process_callback(query):
     subject_id = query.data
 
     bot.send_message(query.message.chat.id,
-                     "enter interrogation name and date, '/i name : date(yyy-mm-dd)'")
+                     "enter interrogation name and date, '/i name : yyyy-mm-dd'")
 
     @bot.message_handler(content_types=["text"], commands=["i"])
     def process_name_step(message):
