@@ -134,16 +134,23 @@ def process_callback(query):
             new_name = name[2::]
             new_date = date.strip()
             format = "%Y-%m-%d"
-            try:
-                datetime.datetime.strptime(new_date, format)
-                new_interro = Interrogation(
-                    name=new_name, date=date, subject_id=subject_id)
-                db.add(new_interro)
-                db.commit()
-                bot.send_message(message.chat.id, "new interrogation added!")
-            except ValueError:
+            if len(new_name) >= 20:
                 bot.send_message(
-                    message.chat.id, "incorrect date format, sorry")
+                    message.chat.id, "incorrect name format, sorry")
+            else:
+                try:
+                    datetime.datetime.strptime(new_date, format)
+                    year, month, day = new_date.split('-')
+                    datetime.datetime(year=int(year),month=int(month),day=int(day))
+                    new_interro = Interrogation(
+                        name=new_name, date=date, subject_id=subject_id)
+                    db.add(new_interro)
+                    db.commit()
+                    bot.send_message(
+                        message.chat.id, "new interrogation added!")
+                except ValueError:
+                    bot.send_message(
+                        message.chat.id, "incorrect date format, sorry")
 
 
 bot.infinity_polling()
